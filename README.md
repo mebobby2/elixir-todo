@@ -3,8 +3,8 @@
 ## To Run
 
 * iex
-* c(["simple_todo.ex", "todo_multi_dict.ex"])
-* l = TodoList.new |> TodoList.add_entry(%{date: {2013,12,19}, title: "Dentist"})
+* c(["simple_todo.ex"])
+* l = TodoList.new |> TodoList.add_entry(%{date: {2013,12,20}, title: "Shopping"})
 * TodoList.entries(l, {2013,12,19})
 
-Upto page 104
+Upto page 118 - Updating entries

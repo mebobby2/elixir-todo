@@ -1,11 +1,28 @@
 defmodule TodoList do
-  def new, do: MultiDict.new
+  defstruct auto_id: 1, entries: HashDict.new
 
-  def add_entry(todo_list, entry) do
-    MultiDict.add(todo_list, entry.date, entry)
+  def new, do: %TodoList{}
+
+  def add_entry(
+    %TodoList{entries: entries, auto_id: auto_id} = todo_list,
+    entry
+    ) do
+    entry = Map.put(entry, :id, auto_id)
+    new_entries = HashDict.put(entries, auto_id, entry)
+
+    %TodoList{todo_list |
+      entries: new_entries,
+      auto_id: auto_id + 1
+    }
   end
 
-  def entries(todo_list, date) do
-    MultiDict.get(todo_list, date)
+  def entries(%TodoList{entries: entries}, date) do
+    entries
+    |> Stream.filter(fn({_, entry}) ->
+        entry.date == date
+       end)
+    |> Enum.map(fn({_, entry}) ->
+        entry
+       end)
   end
 end
