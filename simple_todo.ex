@@ -44,4 +44,10 @@ defmodule TodoList do
         entry
        end)
   end
+
+  def delete_entry(
+    %TodoList{entries: entries} = todo_list,
+    entry_id) do
+    %TodoList{todo_list | entries: HashDict.delete(entries, entry_id)}
+  end
 end
