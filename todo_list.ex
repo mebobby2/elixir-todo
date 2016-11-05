@@ -1,7 +1,13 @@
 defmodule TodoList do
   defstruct auto_id: 1, entries: HashDict.new
 
-  def new, do: %TodoList{}
+  def new(entries \\ []) do
+    Enum.reduce(
+      entries,
+      %TodoList{},
+      &add_entry(&2, &1)
+    )
+  end
 
   def add_entry(
     %TodoList{entries: entries, auto_id: auto_id} = todo_list,
