@@ -7,4 +7,4 @@
 * l = TodoList.new |> TodoList.add_entry(%{date: {2013,12,20}, title: "Shopping"})
 * TodoList.entries(l, {2013,12,19})
 
-Upto page 118 - Updating entries
+Upto page 125 - polymorphism with protocols
