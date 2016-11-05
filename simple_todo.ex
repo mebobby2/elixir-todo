@@ -26,7 +26,6 @@ defmodule TodoList do
     updater_func) do
     case entries[entry_id] do
       nil -> todo_list
-
       old_entry ->
         old_entry_id = old_entry.id
         new_entry = %{id: ^old_entry_id} = updater_func.(old_entry)
