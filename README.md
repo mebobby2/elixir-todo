@@ -3,7 +3,7 @@
 ## To Run
 
 * iex
-* c(["simple_todo.ex"])
+* c(["todo_list.ex"])
 * l = TodoList.new |> TodoList.add_entry(%{date: {2013,12,20}, title: "Shopping"})
 * TodoList.entries(l, {2013,12,19})
 
