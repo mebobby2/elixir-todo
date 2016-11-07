@@ -1,6 +1,7 @@
 defmodule TodoServer do
   def start do
     spawn(fn -> loop(TodoList.new) end)
+    #When u call loop with a new todolist, it will block on the receive call. (ref 1)
   end
 
   def add_entry(todo_server, new_entry) do
@@ -18,6 +19,10 @@ defmodule TodoServer do
   end
 
   defp loop(todo_list) do
+    #(ref 1) after the start() call, which calls loop, the loop
+    #method will block on receive, since receive is a blocking call.
+    #But processes blocking do not waste cpu cycles as they are in
+    #a suspended state.
     new_todo_list = receive do
       message ->
         process_message(todo_list, message)
@@ -30,7 +35,7 @@ defmodule TodoServer do
     TodoList.add_entry(todo_list, new_entry)
   end
 
-  def process_message(todo_list, {:entries, caller, date}) do
+  defp process_message(todo_list, {:entries, caller, date}) do
     send(caller, {:todo_entries, TodoList.entries(todo_list, date)})
     todo_list
   end
