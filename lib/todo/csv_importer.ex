@@ -1,10 +1,10 @@
-defmodule TodoList.CsvImporter do
+defmodule Todo.CsvImporter do
 
   def import(file_name) do
     file_name
     |> read_lines
     |> create_entries
-    |> TodoList.new
+    |> Todo.List.new
   end
 
   defp read_lines(file_name) do
