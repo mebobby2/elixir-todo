@@ -101,6 +101,10 @@ It’s important to explain why you register the to-do cache under a local alias
 
 The problem is that supervised processes can be restarted. Remember that restart- ing boils down to starting another process in place of the old one—and the new pro- cess has a different pid. This means any reference to the pid of the crashed process becomes invalid, identifying a nonexistent process. This is why registered aliases are important. They provide a reliable way of finding a process and talking to it, regard- less of possible process restarts.
 
+### Linking all processes
+
+When the supervisor restarts a worker process, you’ll get a completely separate process hierarchy, and there will be a new set of server processes that are in no way related to the previous ones. The previous servers will be unused garbage that are still running and consuming both memory and CPU resources. That is why its important to link related processes.
+
 ## Upto
 
 Upto page 218 - Linking all processes
