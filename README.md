@@ -71,6 +71,10 @@ If a request is a synchronous call, i.e. handle_call, client processs will need 
   end
 ```
 
+### Pooling
+
+Even though in elixir you can start many processes and perform things in parallel, this might result in degraded performance sometimes. E.g. If the parallel processes perform IO. Increasing the number of concurrent disk-based operations doesn’t in reality yield significant improvements and may hurt performance. In such a case, you would typically need to constrain the number of simultaneous IO operations. And this is the purpose of a pool of processes.
+
 ## Upto
 
 Upto page 197 - Exercise: pooling and synchronizing
