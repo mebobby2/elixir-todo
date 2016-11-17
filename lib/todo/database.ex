@@ -6,7 +6,7 @@ defmodule Todo.Database do
   # pid. Of course, the downside is that we can run only one instance of the 
   # database process.
   def start(db_folder) do
-    GenServer.start(__MODULE__, db_folder),
+    GenServer.start(__MODULE__, db_folder,
       name: :database_server
       )
   end
