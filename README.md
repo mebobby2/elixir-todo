@@ -81,6 +81,5 @@ Even though in elixir you can start many processes and perform things in paralle
 
 ## Upto
 
-Upto page 197 - Exercise: pooling and synchronizing
-Already implemented solution, but just need to understand it before moving on
+Upto page 201
 
