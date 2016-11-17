@@ -13,13 +13,31 @@ defmodule Todo.Server do
     GenServer.call(todo_server, {:entries, date})
   end
 
+  # Todo.Database.get is a long running function as it reads from disk.
+  # We need to be careful with long running init/1 callbacks as it will 
+  # block the GenServer.start function. Consequently, a long running
+  # init/1 function will cause the creator process to block. In this case,
+  # a long initiation of to-do server will block the cache process, which 
+  # is used by many clients.
+  # def init(name) do
+  #   {:ok, {name, Todo.Database.get(name) || Todo.List.new}}
+  # end
+
+  # To circumvent this problem, we use a simple trick. We send a message 
+  # to ourselves in the init call and do the real work in the callback
+  # function. This only works for processes that isn't registered under 
+  # a local alias. This is because if it isn't register, we can guarantee
+  # the message we send to it is the first message in the inbox. If it is
+  # registered, an outside process may send a message into the inbox while
+  # this process is still being initialized.
   def init(name) do
-    {:ok, {name, Todo.Database.get(name) || Todo.List.new}}
+    send(self, {:real_init, name})
+    {:ok, nil}
   end
 
   def handle_cast({:add_entry, new_entry}, {name, todo_list}) do
     new_state = Todo.List.add_entry(todo_list, new_entry)
-    Todo.Database.store(name, new_entry)
+    Todo.Database.store(name, new_state)
     {:noreply, {name, new_state}}
   end
 
@@ -29,6 +47,10 @@ defmodule Todo.Server do
       Todo.List.entries(todo_list, date),
       {name, todo_list}
     }
+  end
+
+  def handle_info({:real_init, name}, state) do
+    {:noreply, {name, Todo.Database.get(name) || Todo.List.new}}
   end
 end
 
