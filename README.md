@@ -2,10 +2,11 @@
 
 ## To Run
 
-* iex
-* c(["todo_list.ex"])
-* l = TodoList.new |> TodoList.add_entry(%{date: {2013,12,20}, title: "Shopping"})
-* TodoList.entries(l, {2013,12,19})
+* iex -S mix
+* {:ok, cache} = Todo.Cache.start
+* bobs_list = Todo.Cache.server_process(cache, "Bob's list")
+* Todo.Server.add_entry(bobs_list, %{date: {2013, 12, 19}, title: "Dentist"})
+* Todo.Server.entries(bobs_list, {2013, 12, 19})
 
 Upto page 189 - Persisting data
 
