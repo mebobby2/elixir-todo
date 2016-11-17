@@ -8,7 +8,7 @@
 * Todo.Server.add_entry(bobs_list, %{date: {2013, 12, 19}, title: "Dentist"})
 * Todo.Server.entries(bobs_list, {2013, 12, 19})
 
-## Elixir Tip
+## Elixir Tips
 
 ### What are the reasons for running a piece of code in a dedicated server process?
 
