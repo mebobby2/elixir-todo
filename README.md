@@ -107,5 +107,5 @@ When the supervisor restarts a worker process, you’ll get a completely separat
 
 ## Upto
 
-Upto page 220 - Restart frequency
+Upto page 222
 
