@@ -8,7 +8,7 @@
 * Todo.Server.add_entry(bobs_list, %{date: {2013, 12, 19}, title: "Dentist"})
 * Todo.Server.entries(bobs_list, {2013, 12, 19})
 
-## Notes
+## Elixir Tip
 
 ### What are the reasons for running a piece of code in a dedicated server process?
 
@@ -18,6 +18,7 @@
 
 If none of these conditions are met, you probably don’t need a process and can run the code in client processes, which will completely eliminate the bottleneck and promote parallelism and scalability.
 
+## Upto
 
 Upto page 189 - Persisting data
 
