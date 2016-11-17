@@ -3,7 +3,7 @@
 ## To Run
 
 * iex -S mix
-* {:ok, cache} = Todo.Cache.start
+* Todo.Supervisor.start_link
 * bobs_list = Todo.Cache.server_process(cache, "Bob's list")
 * Todo.Server.add_entry(bobs_list, %{date: {2013, 12, 19}, title: "Dentist"})
 * Todo.Server.entries(bobs_list, {2013, 12, 19})
@@ -94,6 +94,12 @@ In a complex system, most bugs are flushed out in the testing phase. The remaini
 This may help, because you’re getting rid of the process state (which may be cor- rupt) and starting with a clean state. In many cases, doing so resolves the immediate problem. Of course, the error should be logged so you can analyze it later and detect the root cause. But in the meantime, you can recover from an unexpected failure and continue providing service. This is a property of a self-healing system.
 
 Because processes share no memory, a crash in one process won’t leave memory garbage that might corrupt another process. Therefore, by running independent actions in separate processes, you automatically ensure isolation and protection. 
+
+### Aliases allow process discovery
+
+It’s important to explain why you register the to-do cache under a local alias. You should always keep in mind that in order to talk to a process, you need to have its pid. In chapter 7, you used a naive approach, somewhat resembling that of typical OO systems, where you created a process and then passed around its pid. This works fine until you enter the supervisor realm.
+
+The problem is that supervised processes can be restarted. Remember that restart- ing boils down to starting another process in place of the old one—and the new pro- cess has a different pid. This means any reference to the pid of the crashed process becomes invalid, identifying a nonexistent process. This is why registered aliases are important. They provide a reliable way of finding a process and talking to it, regard- less of possible process restarts.
 
 ## Upto
 
