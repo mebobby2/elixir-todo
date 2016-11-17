@@ -103,9 +103,9 @@ The problem is that supervised processes can be restarted. Remember that restart
 
 ### Linking all processes
 
-When the supervisor restarts a worker process, you’ll get a completely separate process hierarchy, and there will be a new set of server processes that are in no way related to the previous ones. The previous servers will be unused garbage that are still running and consuming both memory and CPU resources. That is why its important to link related processes.
+When the supervisor restarts a worker process, you’ll get a completely separate process hierarchy, and there will be a new set of server processes that are in no way related to the previous ones. The previous servers will be unused garbage that are still running and consuming both memory and CPU resources. That is why its important to link related processes. Links ensure that dependent processes are terminated as well, which keeps the system consistent.
 
 ## Upto
 
-Upto page 218 - Linking all processes
+Upto page 220 - Restart frequency
 
