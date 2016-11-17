@@ -20,5 +20,5 @@ If none of these conditions are met, you probably don’t need a process and can
 
 ## Upto
 
-Upto page 189 - Persisting data
+Upto page 197 - Exercise: pooling and synchronizing
 
