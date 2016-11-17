@@ -103,5 +103,5 @@ The problem is that supervised processes can be restarted. Remember that restart
 
 ## Upto
 
-Upto page 213 - Defining a supervisor
+Upto page 218 - Linking all processes
 
