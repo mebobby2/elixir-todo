@@ -50,6 +50,13 @@ defmodule Todo.Server do
   end
 
   def handle_info({:real_init, name}, state) do
+    # Todo.Database.get is a synchronous call, meaning this process will need 
+    # to with for it here. To increase the responsiveness of the system, we 
+    # put a timeout on the get call, but this doesn't really speed up the 
+    # system. This is because even if the call times out, the message will
+    # still be in the callee's inbox, meaning the callee process will
+    # need to reprocess again in the near future, potentially resulting
+    # in the same problem.
     {:noreply, {name, Todo.Database.get(name) || Todo.List.new}}
   end
 end
