@@ -18,7 +18,61 @@
 
 If none of these conditions are met, you probably don’t need a process and can run the code in client processes, which will completely eliminate the bottleneck and promote parallelism and scalability.
 
+### Limitation of registering processes with local aliases
+
+When registering the process locally under an alias, will keep things simple and relieves us from passing around the process pid. Of course, the downside is that we can run only one instance of the database process.
+
+### Benefits/drawbacks of cast
+
+Using cast promotes scalability of the system because the caller issues a request and goes about its business. This comes at the cost of consistency as we can't be confident about whether a request has succeeded.
+
+### Hack to circumvent long running init/1 callbacks
+
+A long running function eg it reads from disk needs, to be carefully reasoned about. We need to be careful with long running init/1 callbacks as it will block the GenServer.start function. Consequently, a long running init/1 function will cause the creator process to block. If the creator process is used by many other client processes, then the whole system will be blocked and responsiveness of the system will decrease.  
+
+To circumvent this problem, we use a simple trick. We send a message to ourselves in the init call and do the real work in the callback function. This only works for processes that isn't registered under a local alias. This is because if it isn't register, we can guarantee the message we send to it is the first message in the inbox. If it is registered, an outside process may send a message into the inbox while this process is still being initialized.
+
+```
+  def init(name) do
+    send(self, {:real_init, name})
+    {:ok, nil}
+  end
+
+  def handle_info({:real_init, name}, state) do
+    {:noreply, {name, Todo.Database.get(name) || Todo.List.new}}
+  end
+```
+
+### Synchronous Request Timeout Gotchas
+
+If a request is a synchronous call, i.e. handle_call, client processs will need to wait for it. To increase the responsiveness of the system, we can put a timeout on the get call, but this doesn't really speed up the overall system. This is because even if the call times out, the message will still be in the callee's inbox, meaning the callee process will need to reprocess again in the near future, potentially resulting in the same problem.
+
+### Understanding the Receive function
+
+```
+  defmodule TodoServer do
+    def start do
+      spawn(fn -> loop(TodoList.new) end)
+      #When u call loop with a new todolist, it will block on the receive call. (ref 1)
+    end
+
+    defp loop(todo_list) do
+      #(ref 1) after the start() call, which calls loop, the loop
+      #method will block on receive, since receive is a blocking call.
+      #But processes blocking do not waste cpu cycles as they are in
+      #a suspended state.
+      new_todo_list = receive do
+        message ->
+          process_message(todo_list, message)
+      end
+
+      loop(new_todo_list)
+    end
+  end
+```
+
 ## Upto
 
 Upto page 197 - Exercise: pooling and synchronizing
+Already implemented solution, but just need to understand it before moving on
 
