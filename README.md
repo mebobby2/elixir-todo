@@ -105,6 +105,10 @@ The problem is that supervised processes can be restarted. Remember that restart
 
 When the supervisor restarts a worker process, you’ll get a completely separate process hierarchy, and there will be a new set of server processes that are in no way related to the previous ones. The previous servers will be unused garbage that are still running and consuming both memory and CPU resources. That is why its important to link related processes. Links ensure that dependent processes are terminated as well, which keeps the system consistent.
 
+### Modifying lists
+
+When you modify the nth element of a list, the new version will contain shallow copies of the first n – 1 elements, followed by the modified element. After that, the tails are completely shared. This is precisely why adding elements to the end of a list is expensive. To append a new element at the tail, you have to iterate and (shallow) copy the entire list! In contrast, pushing an element to the top of a list doesn’t copy anything, which makes it the least expensive operation
+
 ## Upto
 
 Upto page 222
