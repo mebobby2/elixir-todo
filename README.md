@@ -125,7 +125,11 @@ For example, consider a process that handles an HTTP request or a TCP connec- ti
 
 Another option is a transient worker, which is restarted only if it terminates abnor- mally. Transient workers can be used for processes that may terminate normally, as part of the standard system workflow. For example, in the caching scheme, you use to- do server processes to keep to-do lists in memory. You may want to terminate individ- ual servers normally if they haven’t been used for a while. But if a server crashes abnormally, you want to restart it. This is exactly how transient workers function. A transient worker can be specified with worker(module, args, restart: :transient).
 
+### Let it crash
 
+Let it crash can initially seem confusing, and people may mistake it for the let everything crash approach. There are two important situations in which you should explicitly handle an error:
+* Critical processes that shouldn’t crash
+* An error that can be dealt with in a meaningful way
 
 ## Upto
 
