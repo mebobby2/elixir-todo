@@ -117,6 +117,16 @@ How do we make sure that a crash in one worker process do not take down the enti
 
 We use a process registry to achieve this. Every time a process is created, it can register itself to the registry under an alias. If a process is terminated and restarted, the new process will re-register itself. So, having a registry will give you a fixed point where you can discover processes (their pids).
 
+### Avoiding process restarting
+
+By default, a supervisor restarts a terminated process, regardless of the exit reason. Even if the process terminates with the reason :normal, it will be restarted. Sometimes you may want to alter this behavior.
+
+For example, consider a process that handles an HTTP request or a TCP connec- tion. If such a process fails, the socket will be closed, and there’s no point in restarting the process (the remote party will be disconnected anyway). Regardless, you want to have such processes under a supervision tree, because this makes it possible to termi- nate the entire supervisor subtree without leaving dangling processes. In this situa- tion, you can set up a temporary worker by using worker(module, args, restart: :temporary) in the supervisor specification. A temporary worker isn’t restarted on termination.
+
+Another option is a transient worker, which is restarted only if it terminates abnor- mally. Transient workers can be used for processes that may terminate normally, as part of the standard system workflow. For example, in the caching scheme, you use to- do server processes to keep to-do lists in memory. You may want to terminate individ- ual servers normally if they haven’t been used for a while. But if a server crashes abnormally, you want to restart it. This is exactly how transient workers function. A transient worker can be specified with worker(module, args, restart: :transient).
+
+
+
 ## Upto
 
 Upto page 222
