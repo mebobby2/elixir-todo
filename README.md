@@ -30,6 +30,10 @@ When registering the process locally under an alias, will keep things simple and
 
 Using cast promotes scalability of the system because the caller issues a request and goes about its business. This comes at the cost of consistency as we can't be confident about whether a request has succeeded. Calls can also be used to apply back pressure to client processes. Because a call blocks a client, it prevents the client from generating too much work. The client becomes synchronized with the server and can never produce more work than the server can handle. In contrast, if you use casts, clients may overload the server, and requests may pile up in the message box and consume memory. Ultimately, you may run out of memory, and the entire VM may be terminated.
 
+### Supervisors localise impact
+
+Supervisors allow you to localize the impact of an error, keeping unrelated parts of the system undisturbed.
+
 ### Hack to circumvent long running init/1 callbacks
 
 A long running function eg it reads from disk needs, to be carefully reasoned about. We need to be careful with long running init/1 callbacks as it will block the GenServer.start function. Consequently, a long running init/1 function will cause the creator process to block. If the creator process is used by many other client processes, then the whole system will be blocked and responsiveness of the system will decrease.
@@ -128,10 +132,34 @@ Another option is a transient worker, which is restarted only if it terminates a
 ### Let it crash
 
 Let it crash can initially seem confusing, and people may mistake it for the let everything crash approach. There are two important situations in which you should explicitly handle an error:
-* Critical processes that shouldn’t crash
-* An error that can be dealt with in a meaningful way
+* Critical processes that shouldn’t crash. Keep code in these processes as simple and short as possible so there are less chances of it crashing. Also, it makes sense to use defensive try/catch statements in each handle_* callback of critical processes.
+* An error that can be dealt with in a meaningful way. Look at the :get request in the database worker:
+```
+def handle_call({:get, key}, _, db_folder) do
+  data = case File.read(file_name(db_folder, key)) do
+    {:ok, contents} -> :erlang.binary_to_term(contents)
+    _ -> nil
+  end
+  {:reply, data, db_folder}
+end
+
+```
+When handling a get request, you try to read from the file, covering the case when this reading fails. If you don’t succeed, you return nil, treating this case as if an entry for the given key isn’t in the database.
+
+You can do better. Consider using an error only when a file isn’t available. This error is identified with {:error, :enoent}, so the corresponding code would look like this:
+```
+case File.read(...) do
+  {:ok, contents} -> do_something_with(contents)
+  {:error, :enoent} -> nil
+end
+```
+If neither of these two expected situa- tions happens, a pattern match will fail, and so will your process. This is the idea of let it crash. You deal with expected situations (the file is either available or doesn’t exist), ignoring anything else that can go wrong (for example, you don’t have permissions). Personally, I don’t even regard this as error handling. It’s a normal execution path— an expected situation that can and should be dealt with. It’s certainly not something you should let crash.
+
+In contrast, when storing data, you use File.write!/2 (notice the exclamation), which may throw an exception and crash the process. If you didn’t succeed in saving the data, then your database worker has failed, and there’s no point in hiding this fact. Better to fail fast, which will cause an error that will be logged and (hopefully) noticed and fixed.
+
+As a general rule, if you know what to do with an error, you should definitely han- dle it. Otherwise, for anything unexpected, let the process crash, and ensure proper error isolation and recovery via supervisors.
 
 ## Upto
 
-Upto page 222
+Upto page 247 - chapter 10
 
