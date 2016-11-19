@@ -163,11 +163,17 @@ As a general rule, if you know what to do with an error, you should definitely h
 
 ETS is a separate memory-data structure where you can store Erlang terms. This makes it possible to share the system-wide state without introducing a dedicated server process. ETS tables are powered by C code, which ensures better speed and efficiency.
 
+An ETS table are a mutable data structure where you can store tuples.
+
+ETS tables reside in a separate memory space and can be accessed concurrently by many processes.
+
+When sharing data among many processes, consider using ETS for better performance and scalability. Be careful about concurrent writes, and try to serialize writes to the same table (or to the same row) through the single process.
+
 ### Indepedent operations
 
 The moral of the story is to try and run independent operations in separate pro- cesses. This will ensure that available CPUs are used as much as possible and promote scalability of your system.
 
 ## Upto
 
-Upto page 247 - chapter 10
+Upto page 263 - Part 3
 
