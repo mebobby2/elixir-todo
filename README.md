@@ -159,6 +159,14 @@ In contrast, when storing data, you use File.write!/2 (notice the exclamation), 
 
 As a general rule, if you know what to do with an error, you should definitely han- dle it. Otherwise, for anything unexpected, let the process crash, and ensure proper error isolation and recovery via supervisors.
 
+### ETS tables
+
+ETS is a separate memory-data structure where you can store Erlang terms. This makes it possible to share the system-wide state without introducing a dedicated server process. ETS tables are powered by C code, which ensures better speed and efficiency.
+
+### Indepedent operations
+
+The moral of the story is to try and run independent operations in separate pro- cesses. This will ensure that available CPUs are used as much as possible and promote scalability of your system.
+
 ## Upto
 
 Upto page 247 - chapter 10
