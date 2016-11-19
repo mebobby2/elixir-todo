@@ -20,7 +20,7 @@ If none of these conditions are met, you probably don’t need a process and can
 
 ### Processes are bottlenecks
 
-Because a process can only run one piece of code at a time, it becomes a bottleneck. So, though process can synchronise code, manage state, and handle resource reuse, they run sequentially and are a bottleneck in the system. Keep this in mind. There are however many ways to optimise single processes. 
+Because a process can only run one piece of code at a time, it becomes a bottleneck. So, though process can synchronise code, manage state, and handle resource reuse, they run sequentially and are a bottleneck in the system. Keep this in mind. There are however many ways to optimise single processes.
 
 ### Limitation of registering processes with local aliases
 
@@ -28,11 +28,11 @@ When registering the process locally under an alias, will keep things simple and
 
 ### Benefits/drawbacks of cast/call
 
-Using cast promotes scalability of the system because the caller issues a request and goes about its business. This comes at the cost of consistency as we can't be confident about whether a request has succeeded. Calls can also be used to apply back pressure to client processes. Because a call blocks a client, it prevents the client from generating too much work. The client becomes synchronized with the server and can never produce more work than the server can handle. In contrast, if you use casts, clients may overload the server, and requests may pile up in the message box and consume memory. Ultimately, you may run out of memory, and the entire VM may be terminated. 
+Using cast promotes scalability of the system because the caller issues a request and goes about its business. This comes at the cost of consistency as we can't be confident about whether a request has succeeded. Calls can also be used to apply back pressure to client processes. Because a call blocks a client, it prevents the client from generating too much work. The client becomes synchronized with the server and can never produce more work than the server can handle. In contrast, if you use casts, clients may overload the server, and requests may pile up in the message box and consume memory. Ultimately, you may run out of memory, and the entire VM may be terminated.
 
 ### Hack to circumvent long running init/1 callbacks
 
-A long running function eg it reads from disk needs, to be carefully reasoned about. We need to be careful with long running init/1 callbacks as it will block the GenServer.start function. Consequently, a long running init/1 function will cause the creator process to block. If the creator process is used by many other client processes, then the whole system will be blocked and responsiveness of the system will decrease.  
+A long running function eg it reads from disk needs, to be carefully reasoned about. We need to be careful with long running init/1 callbacks as it will block the GenServer.start function. Consequently, a long running init/1 function will cause the creator process to block. If the creator process is used by many other client processes, then the whole system will be blocked and responsiveness of the system will decrease.
 
 To circumvent this problem, we use a simple trick. We send a message to ourselves in the init call and do the real work in the callback function. This only works for processes that isn't registered under a local alias. This is because if it isn't register, we can guarantee the message we send to it is the first message in the inbox. If it is registered, an outside process may send a message into the inbox while this process is still being initialized.
 
@@ -93,7 +93,7 @@ In a complex system, most bugs are flushed out in the testing phase. The remaini
 
 This may help, because you’re getting rid of the process state (which may be cor- rupt) and starting with a clean state. In many cases, doing so resolves the immediate problem. Of course, the error should be logged so you can analyze it later and detect the root cause. But in the meantime, you can recover from an unexpected failure and continue providing service. This is a property of a self-healing system.
 
-Because processes share no memory, a crash in one process won’t leave memory garbage that might corrupt another process. Therefore, by running independent actions in separate processes, you automatically ensure isolation and protection. 
+Because processes share no memory, a crash in one process won’t leave memory garbage that might corrupt another process. Therefore, by running independent actions in separate processes, you automatically ensure isolation and protection.
 
 ### Aliases allow process discovery
 
@@ -108,6 +108,14 @@ When the supervisor restarts a worker process, you’ll get a completely separat
 ### Modifying lists
 
 When you modify the nth element of a list, the new version will contain shallow copies of the first n – 1 elements, followed by the modified element. After that, the tails are completely shared. This is precisely why adding elements to the end of a list is expensive. To append a new element at the tail, you have to iterate and (shallow) copy the entire list! In contrast, pushing an element to the top of a list doesn’t copy anything, which makes it the least expensive operation
+
+### Rich process discovery
+
+If we had one process, lets call it A, that is responsible for starting (start_link) a number of worker processes and keeping track of their pids, and process A is being supervised. If one worker process dies, we must restart all the worker processes. This is because the error from the worker process will be trapped in process A's supervisor, and the supervisor will restart process A, which in turn will restart all the workers.
+
+How do we make sure that a crash in one worker process do not take down the entire supervision tree? We supervise each of the worker process themselves. But in order to be supervised, a worker process must be registered under an alias, and not a pid. This is a property of the Supervisor pattern, You can’t keep a process’s pid for a long time, because that process might be restarted, and its successor will have a different pid.
+
+We use a process registry to achieve this. Every time a process is created, it can register itself to the registry under an alias. If a process is terminated and restarted, the new process will re-register itself. So, having a registry will give you a fixed point where you can discover processes (their pids).
 
 ## Upto
 

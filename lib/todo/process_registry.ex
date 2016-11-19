@@ -15,6 +15,10 @@ defmodule Todo.ProcessRegistry do
     GenServer.call(:process_registry, {:whereis_name, key})
   end
 
+  def unregister_name(key) do
+    GenServer.call(:process_registry, {:unregister_name, key})
+  end
+
   def send(key, message) do
     case whereis_name(key) do
       :undefined -> {:badarg, {key, message}}
@@ -51,7 +55,7 @@ defmodule Todo.ProcessRegistry do
   end
 
   def handle_info({:DOWN, _, :process, pid, _}, process_registry) do
-    {:noreply, deregister_pid(new_registry, pid)}
+    {:noreply, deregister_pid(process_registry, pid)}
   end
 
   def handle_info(_, state), do: {:noreply, state}
