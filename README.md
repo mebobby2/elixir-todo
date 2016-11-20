@@ -32,7 +32,7 @@ Using cast promotes scalability of the system because the caller issues a reques
 
 ### Supervisors localise impact
 
-Supervisors allow you to localize the impact of an error, keeping unrelated parts of the system undisturbed. It's important to build supervision tree so that when parts of your application fails, it does not affect the unrelated parts and your system can still go on providing partial service to users. 
+Supervisors allow you to localize the impact of an error, keeping unrelated parts of the system undisturbed. It's important to build a supervision tree so that when parts of your application fails, it does not affect the unrelated parts and your system can still go on providing partial service to users. 
 
 ### Hack to circumvent long running init/1 callbacks
 
