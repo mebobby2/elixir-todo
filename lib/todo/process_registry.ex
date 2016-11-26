@@ -43,7 +43,7 @@ defmodule Todo.ProcessRegistry do
     else
       Process.monitor(pid) # Monitor allows us to detect the termination of a registered process
       :ets.insert(:process_registry, {key, pid})
-      {:reply, :yes, HashDict.put(process_registry, key, pid)}
+      {:reply, :yes, state}
     end
   end
 
