@@ -188,6 +188,21 @@ Dependencies are fetched from Elixir’s external package manager, which is call
 
 Running deps.get fetches all dependencies (recursively) and stores the reference to the exact version of each dependency in the mix.lock file, unless mix.lock already exists on the disk, in which case this file is consulted to fetch the proper versions of dependencies. This ensures reproducible builds across different machines, so make sure you include mix.lock into the source control where your project resides.
 
+### Cowboy
+
+Cowboy server will run various processes. There will be at least one process that listens on a given port and accepts requests. Then, each distinct TCP connection will be handled in a separate process, and your callbacks (which you have to implement) will be invoked in those request specific processes.
+
+Notice that, despite this elaborate process structure, you don’t set up a supervision tree. You call the http/3 function and disregard the result. Why is that? Because Cowboy takes it upon itself to supervise processes it creates. To be more accurate, most processes reside in the supervision tree of the Ranch application, an internal dependency of Cowboy where TCP/SSL communication is handled.
+
+### Applications are Singletons
+
+OTP Applications are singletons — you can start only one instance of a distinct application in a running BEAM instance.
+
+This fact doesn’t mean you can run only one HTTP server in your system. The Cowboy application can be considered a factory for HTTP servers. When you start the Cowboy application, the supervision tree is set up, but no HTTP server is started yet.
+
+Only when you call Plug.Adapters.Cowboy.http/3 is a separate set of processes started and placed in the Ranch supervision tree. This means you can call http/3 as many time as you want (providing a different port, of course). You could, for example, just as easily start an additional HTTPS server or run multiple unrelated servers from the same BEAM instance.
+
+
 ## Upto
 
 Upto page 263 - Part 3
