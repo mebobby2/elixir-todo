@@ -180,6 +180,14 @@ In addition to your application, the lib folder contains your compile-time depen
 
 The application resource file resides in lib/YourApp/ebin and is named as YourApp.app. For the to-do system, the file resides in _build/dev/lib/todo/ ebin/ (relative to the root project folder). When you attempt to start the application, the generic application behaviour looks for the resource file in the load paths (the same paths that are searched for compiled binaries).
 
+### Hex
+
+Dependencies are fetched from Elixir’s external package manager, which is called Hex. Other possi- ble dependency sources include the GitHub repository, a git repository, or a local folder.
+
+### Deps
+
+Running deps.get fetches all dependencies (recursively) and stores the reference to the exact version of each dependency in the mix.lock file, unless mix.lock already exists on the disk, in which case this file is consulted to fetch the proper versions of dependencies. This ensures reproducible builds across different machines, so make sure you include mix.lock into the source control where your project resides.
+
 ## Upto
 
 Upto page 263 - Part 3
