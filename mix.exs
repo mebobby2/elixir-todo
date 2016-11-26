@@ -35,9 +35,10 @@ defmodule Todo.Mixfile do
     [
       {:gproc, "~> 0.3.1"},
       {:cowboy, "~> 1.0.0"},
-      {:plug, "~> 1.0"},
+      {:plug, "~> 1.2.2"},
       {:meck, "~> 0.8.2", only: :test},
-      {:httpotion, "~> 3.0.2", only: :test}
+      {:httpotion, "~> 0.2.2", only: :test},
+      {:ibrowse, "~> 4.2.2", only: :test}
     ]
   end
 end

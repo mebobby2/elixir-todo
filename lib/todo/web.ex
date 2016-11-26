@@ -11,7 +11,7 @@ defmodule Todo.Web do
   # curl 'http://localhost:5454/entries?list=bob&date=20131219'
   get "/entries" do
     conn
-    |> Plug.Conn.fetch_params
+    |> Plug.Conn.fetch_query_params
     |> fetch_entries
     |> respond
   end
@@ -34,7 +34,7 @@ defmodule Todo.Web do
   defp format_entries(entries) do
     for entry <- entries do
       {y,m,d} = entry.date
-      "#{y}-#{m}-#{d}   #{entry.title}"
+      "#{y}-#{m}-#{d}    #{entry.title}"
     end
     |> Enum.join("\n")
   end
@@ -42,7 +42,7 @@ defmodule Todo.Web do
   # curl -d '' 'http://localhost:5454/add_entry?list=bob&date=20131219&title=Dentist'
   post "/add_entry" do
     conn
-    |> Plug.Conn.fetch_params
+    |> Plug.Conn.fetch_query_params
     |> add_entry
     |> respond
   end
