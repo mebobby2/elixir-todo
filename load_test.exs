@@ -6,6 +6,8 @@
 #
 # Then, to start the test:
 #   MIX_ENV=prod elixir  -pa _build/prod/consolidated/  -S mix run load_test.exs
+#
+# Then, wait 120s (or how long the test runs for) to see the results
 
 File.rm_rf("./persist")
 File.mkdir_p("./persist")
