@@ -176,6 +176,10 @@ The moral of the story is to try and run independent operations in separate pro-
 
 Once you compile your project, compiled binaries reside in the _build/ProjectEnv folder, where ProjectEnv is the mix project environment that was in effect during compilation. (MIX_ENV=prod mix compile)
 
+In addition to your application, the lib folder contains your compile-time dependen- cies. Other runtime dependencies (such as Elixir/Erlang standard applications) already reside someplace else on the disk and are accessible via the load path.
+
+The application resource file resides in lib/YourApp/ebin and is named as YourApp.app. For the to-do system, the file resides in _build/dev/lib/todo/ ebin/ (relative to the root project folder). When you attempt to start the application, the generic application behaviour looks for the resource file in the load paths (the same paths that are searched for compiled binaries).
+
 ## Upto
 
 Upto page 263 - Part 3
