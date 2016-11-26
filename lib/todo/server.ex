@@ -15,7 +15,7 @@ defmodule Todo.Server do
   end
 
   def whereis(name) do
-    Todo.ProcessRegistry.whereis_name({:todo_server, name})
+    :gproc.whereis_name({:n, :l, {:todo_server, name}})
   end
 
   def init(name) do
