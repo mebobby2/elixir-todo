@@ -10,3 +10,5 @@
 File.rm_rf("./persist")
 File.mkdir_p("./persist")
 :os.cmd('wrk -t4 -c100 -d120s --timeout 2000 -s wrk.lua "http://localhost:5454"') |> IO.puts
+
+#This runs a benchmark for 120 seconds, using 4 threads, and keeping 100 HTTP connections open.
