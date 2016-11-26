@@ -42,7 +42,7 @@ defmodule Todo.Server do
   end
 
   defp via_tuple(name) do
-    {:via, Todo.ProcessRegistry, {:todo_server, name}}
+    {:via, :gproc, {:n, :l, {:todo_server, name}}}
   end
 end
 
