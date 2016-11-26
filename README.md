@@ -207,5 +207,7 @@ Only when you call Plug.Adapters.Cowboy.http/3 is a separate set of processes st
 
 Upto page 283 - 11.3.4 Reasoning about the system
 
-Before that, figure out why load testing is causing the server to crash...
+Then:
+This chapter will optimize the server. Then we can run our load tests again, making sure the crashes are
+gone and also we get a better throughput
 
