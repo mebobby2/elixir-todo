@@ -33,11 +33,11 @@ defmodule Todo.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:gproc, "0.3.1"},
-      {:cowboy, "1.0.0"},
-      {:plug, "0.10.0"},
-      {:meck, "0.8.2", only: :test},
-      {:httpoison, "0.4.3", only: :test}
+      {:gproc, "~> 0.3.1"},
+      {:cowboy, "~> 1.0.0"},
+      {:plug, "~> 1.0"},
+      {:meck, "~> 0.8.2", only: :test},
+      {:httpotion, "~> 3.0.2", only: :test}
     ]
   end
 end
