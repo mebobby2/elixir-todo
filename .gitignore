@@ -2,4 +2,5 @@
 _build
 deps
 Mnesia*
+persist
 erl_crash.dump
