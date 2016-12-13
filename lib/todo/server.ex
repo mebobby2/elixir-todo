@@ -18,31 +18,53 @@ defmodule Todo.Server do
     :gproc.whereis_name({:n, :l, {:todo_server, name}})
   end
 
-  def init(name) do
-    send(self, {:real_init, name})
-    {:ok, nil}
+  defp via_tuple(name) do
+    {:via, :gproc, {:n, :l, {:todo_server, name}}}
   end
 
-  def handle_cast({:add_entry, new_entry}, {name, todo_list}) do
-    new_state = Todo.List.add_entry(todo_list, new_entry)
-    Todo.Database.store(name, new_state)
-    {:noreply, {name, new_state}}
+  def init(name) do
+    # We don't restore from the database immediately. Instead, we'll lazily
+    # fetch entries for the required date on first request.
+    {:ok, {name, Todo.List.new}}
+  end
+
+  def handle_call({:add_entry, new_entry}, {name, todo_list}) do
+    new_list =
+      todo_list
+      |> initialize_entries(name, new_entry.date)
+      |> Todo.List.add_entry(new_entry)
+
+    # We will store just the entries for the given date, thus reducing the amount
+    # of data that needs to be stored. This could have been made even more fine-grained
+    # but at the expense of more complex queries, so this is a simplistic trade-off.
+    Todo.Database.store(
+      {name, new_entry.date},
+      Todo.List.entries(new_list, new_entry.date)
+    )
+
+    {:reply, :ok, {name, new_list}}
   end
 
   def handle_call({:entries, date}, _, {name, todo_list}) do
-    {
-      :reply,
-      Todo.List.entries(todo_list, date),
-      {name, todo_list}
-    }
+    new_list = initialize_entries(todo_list, name, date)
+    {:reply, Todo.List.entries(new_list, date), {name, new_list}}
   end
 
-  def handle_info({:real_init, name}, state) do
-    {:noreply, {name, Todo.Database.get(name) || Todo.List.new}}
-  end
+  # Neeed for testing purposes
+  def handle_info(:stop, state), do: {:stop, :normal, state}
+  def handle_info(_, state), do: {:noreply, state}
 
-  defp via_tuple(name) do
-    {:via, :gproc, {:n, :l, {:todo_server, name}}}
+  # Initializes entries for the given date if needed. We use cached data, if we
+  # have it. Otherwise, we attempt to load from the database, or use an empty list
+  # if nothing is stored in the database.
+  defp initialize_entries(todo_list, name, date) do
+    case Todo.List.entries(todo_list, date) do
+      nil ->
+        entries = Todo.Database.get({name, date}) || []
+        Todo.List.set_entries(todo_list, date, entries)
+
+      _found -> todo_list
+    end
   end
 end
 

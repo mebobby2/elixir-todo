@@ -2,7 +2,13 @@ defmodule Todo.Database do
   @pool_size 3
 
   def start_link(db_folder) do
-    Todo.PoolSupervisor.start_link(db_folder, @pool_size)
+    :mnesia.stop
+    :mnesia.create_schema([node()])
+    :mnesia.start
+    :mnesia.create_table(:todo_lists, [attributes: [:name, :list], disc_only_copies: [node()]])
+    :ok = :mnesia.wait_for_tables([:todo_lists], 5000)
+
+    Todo.PoolSupervisor.start_link(@pool_size)
   end
 
   def store(key, data) do

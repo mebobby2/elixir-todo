@@ -7,7 +7,7 @@ defmodule Todo.Supervisor do
 
   def init(_) do
     processes = [
-      supervisor(Todo.Database, ["./persist/"]),
+      supervisor(Todo.Database, []),
       supervisor(Todo.ServerSupervisor, []),
       worker(Todo.Cache, [])
     ]

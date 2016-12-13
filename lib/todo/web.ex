@@ -34,9 +34,8 @@ defmodule Todo.Web do
   defp format_entries(entries) do
     for entry <- entries do
       {y,m,d} = entry.date
-      "#{y}-#{m}-#{d}    #{entry.title}"
+      "#{y}-#{m}-#{d}    #{entry.title}\n"
     end
-    |> Enum.join("\n")
   end
 
   # curl -d '' 'http://localhost:5454/add_entry?list=bob&date=20131219&title=Dentist'
