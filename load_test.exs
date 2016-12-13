@@ -1,17 +1,16 @@
-# Setup:
-#   brew install wrk
-#
 # Before starting, run:
 #   MIX_ENV=prod mix compile.protocols
 #
 # Then, to start the test:
 #   MIX_ENV=prod elixir  -pa _build/prod/consolidated/  -S mix run load_test.exs
-#
-# Then, wait 120s (or how long the test runs for) to see the results
 
-File.rm_rf("./persist")
-File.mkdir_p("./persist")
+:ok = :mnesia.wait_for_tables([:todo_lists], 1000)
+{:atomic, :ok} = :mnesia.clear_table(:todo_lists)
+
 :os.cmd('wrk -t4 -c100 -d120s --timeout 2000 -s wrk.lua "http://localhost:5454"') |> IO.puts
+
+Application.stop(:mnesia)
+File.rm_rf("./Mnesia.nonode@nohost")
 
 #This runs a benchmark for 120 seconds, using 4 threads, and keeping 100 HTTP connections open.
 
