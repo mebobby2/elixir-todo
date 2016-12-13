@@ -205,9 +205,9 @@ Only when you call Plug.Adapters.Cowboy.http/3 is a separate set of processes st
 
 ## Upto
 
-Upto page 283 - 11.3.4 Reasoning about the system
+Upto page 285 - Calls vs Casts
 
-Then:
-This chapter will optimize the server. Then we can run our load tests again, making sure the crashes are
-gone and also we get a better throughput
+Before:
+After the optimizations in place, the load tests runs without crashes.
+Before continuing with book, look through the 1. database.ex and database_worker.ex 2. list.ex, and 3. server.ex to make sure u understand the optimization changes
 

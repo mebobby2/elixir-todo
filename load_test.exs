@@ -49,3 +49,14 @@ File.mkdir_p("./persist")
 #   Non-2xx or 3xx responses: 8
 # Requests/sec:   2199.54
 # Transfer/sec:    667.90KB
+
+## Results After Optimisations
+
+# Running 2m test @ http://localhost:5454
+#   4 threads and 100 connections
+#   Thread Stats   Avg      Stdev     Max   +/- Stdev
+#     Latency    20.32ms   25.81ms 430.41ms   86.72%
+#     Req/Sec     2.01k   761.37     4.30k    66.95%
+#   956904 requests in 2.00m, 278.90MB read
+# Requests/sec:   7970.17
+# Transfer/sec:      2.32MB
