@@ -54,8 +54,10 @@ File.rm_rf("./Mnesia.nonode@nohost")
 # Running 2m test @ http://localhost:5454
 #   4 threads and 100 connections
 #   Thread Stats   Avg      Stdev     Max   +/- Stdev
-#     Latency    20.32ms   25.81ms 430.41ms   86.72%
-#     Req/Sec     2.01k   761.37     4.30k    66.95%
-#   956904 requests in 2.00m, 278.90MB read
-# Requests/sec:   7970.17
-# Transfer/sec:      2.32MB
+#     Latency    13.55ms   17.70ms 275.53ms   88.18%
+#     Req/Sec     2.85k   727.29     4.74k    68.04%
+#   1357850 requests in 2.00m, 338.71MB read
+# Requests/sec:  11306.99
+# Transfer/sec:      2.82MB
+
+
