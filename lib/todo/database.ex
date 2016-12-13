@@ -1,7 +1,7 @@
 defmodule Todo.Database do
   @pool_size 3
 
-  def start_link(db_folder) do
+  def start_link do
     :mnesia.stop
     :mnesia.create_schema([node()])
     :mnesia.start

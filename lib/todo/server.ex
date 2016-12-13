@@ -7,7 +7,8 @@ defmodule Todo.Server do
   end
 
   def add_entry(todo_server, new_entry) do
-    GenServer.cast(todo_server, {:add_entry, new_entry})
+    # add_entry is turned into a call
+    GenServer.call(todo_server, {:add_entry, new_entry})
   end
 
   def entries(todo_server, date) do
@@ -22,13 +23,15 @@ defmodule Todo.Server do
     {:via, :gproc, {:n, :l, {:todo_server, name}}}
   end
 
+
   def init(name) do
     # We don't restore from the database immediately. Instead, we'll lazily
     # fetch entries for the required date on first request.
     {:ok, {name, Todo.List.new}}
   end
 
-  def handle_call({:add_entry, new_entry}, {name, todo_list}) do
+
+  def handle_call({:add_entry, new_entry}, _, {name, todo_list}) do
     new_list =
       todo_list
       |> initialize_entries(name, new_entry.date)
@@ -38,19 +41,20 @@ defmodule Todo.Server do
     # of data that needs to be stored. This could have been made even more fine-grained
     # but at the expense of more complex queries, so this is a simplistic trade-off.
     Todo.Database.store(
-      {name, new_entry.date},
+      {name, new_entry.date},     # The key is now more complex
       Todo.List.entries(new_list, new_entry.date)
     )
 
     {:reply, :ok, {name, new_list}}
   end
 
+
   def handle_call({:entries, date}, _, {name, todo_list}) do
     new_list = initialize_entries(todo_list, name, date)
     {:reply, Todo.List.entries(new_list, date), {name, new_list}}
   end
 
-  # Neeed for testing purposes
+  # Needed for testing purposes
   def handle_info(:stop, state), do: {:stop, :normal, state}
   def handle_info(_, state), do: {:noreply, state}
 
@@ -67,14 +71,3 @@ defmodule Todo.Server do
     end
   end
 end
-
-
-
-
-
-
-
-
-
-
-

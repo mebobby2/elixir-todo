@@ -2,16 +2,12 @@ defmodule HttpServerTest do
   use ExUnit.Case, async: false
 
   setup do
-    # This is an integration test of the entire app. We first remove old
-    # persisted data, and then start the app.
     File.rm_rf("./persist/")
+    File.rm_rf("Mnesia.nonode@nohost")
     {:ok, apps} = Application.ensure_all_started(:todo)
-
-    # We also need to start HTTPotion
     HTTPotion.start
 
     on_exit fn ->
-      # When the test is finished, we'll stop all application we started.
       Enum.each(apps, &Application.stop/1)
     end
 
@@ -25,7 +21,7 @@ defmodule HttpServerTest do
     assert %HTTPotion.Response{body: "OK", status_code: 200} =
       HTTPotion.post("http://127.0.0.1:5454/add_entry?list=test&date=20131219&title=Dentist", "")
 
-    assert %HTTPotion.Response{body: "2013-12-19    Dentist", status_code: 200} =
+    assert %HTTPotion.Response{body: "2013-12-19    Dentist\n", status_code: 200} =
       HTTPotion.get("http://127.0.0.1:5454/entries?list=test&date=20131219")
   end
 end

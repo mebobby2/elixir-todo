@@ -1,4 +1,5 @@
 *.beam
 _build
 deps
+Mnesia*
 erl_crash.dump

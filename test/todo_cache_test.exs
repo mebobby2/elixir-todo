@@ -3,7 +3,7 @@ defmodule TodoCacheTest do
 
   setup do
     :meck.new(Todo.Database, [:no_link])
-    :meck.expect(Todo.Database, :start_link, fn(_) -> nil end)
+    :meck.expect(Todo.Database, :start_link, fn -> nil end)
     :meck.expect(Todo.Database, :get, fn(_) -> nil end)
     :meck.expect(Todo.Database, :store, fn(_, _) -> :ok end)
     on_exit(fn ->

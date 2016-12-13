@@ -3,10 +3,10 @@ defmodule DatabaseServerTest do
 
   setup do
     :meck.new(Todo.DatabaseWorker, [:no_link])
-    :meck.expect(Todo.DatabaseWorker, :start_link, &MockTodo.DatabaseWorker.start/2)
+    :meck.expect(Todo.DatabaseWorker, :start_link, &MockTodo.DatabaseWorker.start/1)
     :meck.expect(Todo.DatabaseWorker, :store, &MockTodo.DatabaseWorker.store/3)
     :meck.expect(Todo.DatabaseWorker, :get, &MockTodo.DatabaseWorker.get/2)
-    Todo.Database.start_link("./test_persist")
+    Todo.Database.start_link
 
     on_exit(fn ->
       File.rm_rf("./test_persist/")
@@ -24,7 +24,7 @@ end
 defmodule MockTodo.DatabaseWorker do
   use GenServer
 
-  def start(_, worker_id) do
+  def start(worker_id) do
     GenServer.start(__MODULE__, nil, name: worker_alias(worker_id))
   end
 

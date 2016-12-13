@@ -1,7 +1,7 @@
 defmodule Todo.DatabaseWorker do
   use GenServer
 
-  def start_link(db_folder, worker_id) do
+  def start_link(worker_id) do
     IO.puts "Starting database worker #{worker_id}"
 
     GenServer.start_link(
@@ -11,7 +11,7 @@ defmodule Todo.DatabaseWorker do
   end
 
   def store(worker_id, key, data) do
-    GenServer.cast(via_tuple(worker_id), {:store, key, data})
+    GenServer.call(via_tuple(worker_id), {:store, key, data})
   end
 
   def get(worker_id, key) do
@@ -19,8 +19,9 @@ defmodule Todo.DatabaseWorker do
   end
 
   defp via_tuple(worker_id) do
-    {:via, :gproc, {:n, :l, {:database_worker, worker_id} }}
+    {:via, :gproc, {:n, :l, {:database_worker, worker_id}}}
   end
+
 
   def init(_) do
     # Instead of performing one request at a time, the worker tries to adapt to
@@ -41,11 +42,12 @@ defmodule Todo.DatabaseWorker do
     {
       :ok,
       %{
-        store_job: nil,           # Pid of the storing job
-        store_queue: HashDict.new # Queue of the incoming items to store
+        store_job: nil,             # Pid of the storing job
+        store_queue: HashDict.new   # Queue of incoming items to store
       }
     }
   end
+
 
   def handle_call({:store, key, data}, from, state) do
     new_state =
@@ -53,6 +55,7 @@ defmodule Todo.DatabaseWorker do
       |> queue_request(from, key, data)
       |> maybe_store
 
+    # Notice how we don't reply. This will be done by the storing job.
     {:noreply, new_state}
   end
 
@@ -60,7 +63,6 @@ defmodule Todo.DatabaseWorker do
     # We always read from the database. We could also lookup incoming queue, but
     # then we return the data which is not yet stored, and thus might not even
     # end up in the database.
-
     read_result = :mnesia.transaction(fn -> :mnesia.read({:todo_lists, key}) end)
 
     data = case read_result do
@@ -71,6 +73,7 @@ defmodule Todo.DatabaseWorker do
     {:reply, data, state}
   end
 
+  # Received when store_job is done storing
   def handle_info({:DOWN, _, :process, pid, _}, %{store_job: store_job} = state)
     when pid == store_job
   do
@@ -84,9 +87,11 @@ defmodule Todo.DatabaseWorker do
 
   def handle_info(_, state), do: {:noreply, state}
 
+
   defp queue_request(state, from, key, data) do
     %{state | store_queue: HashDict.put(state.store_queue, key, {from, data})}
   end
+
 
   defp maybe_store(%{store_job: nil} = state) do
     # store_job is nil, so nothing is storing at the moment, and we can safely
@@ -95,12 +100,13 @@ defmodule Todo.DatabaseWorker do
     if HashDict.size(state.store_queue) > 0 do
       start_store_job(state)
     else
-      state # queue is empty, so there's nothing to store
+      state   # queue is empty, so there's nothing to store
     end
   end
 
   # store_job is already running, so we don't do anything
   defp maybe_store(state), do: state
+
 
   defp start_store_job(state) do
     # We spawn_link the job. There's no need to go through supervisor. If the store job crashes,
@@ -109,10 +115,10 @@ defmodule Todo.DatabaseWorker do
 
     # We'll set-up a monitor to the store job process. Once the job is done,
     # we'll receive a `:DOWN` message, and thus know that store_job
-    process.monitor(store_job)
+    Process.monitor(store_job)
 
     %{state |
-      store_queue: HashDict.new, # Empty the queue
+      store_queue: HashDict.new,    # Empty the queue
       store_job: store_job
     }
   end
