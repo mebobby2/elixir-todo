@@ -210,8 +210,13 @@ Intermediate process: The idea is to provide an immediate response stating that 
 
 This scheme is definitely more elaborate and involved, so it’s not appropriate for simpler cases where using plain calls is enough. But in cases when the load is very high and end-to-end operations can take longer, introducing an intermediate process may be beneficial. This process can increase the responsiveness of the system while retain- ing consistency. Moreover, this process can serve as a proactive agent in dealing with congestion and increased load. If the system becomes overloaded and the queue starts piling up, you can refuse to take more requests in the queue process until you regain some breathing space.
 
+### OTP vs Lib
+
+An OTP application is a reusable component. The application can run the entire supervision tree or just provide utility modules (as a library application). A non-library application is a callback module that must start the supervision
+tree.
+
 
 ## Upto
 
-Upto page 285 - Calls vs Casts
+Upto page 290 - Chapter 12
 
