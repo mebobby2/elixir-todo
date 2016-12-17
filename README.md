@@ -202,6 +202,14 @@ This fact doesn’t mean you can run only one HTTP server in your system. The Co
 
 Only when you call Plug.Adapters.Cowboy.http/3 is a separate set of processes started and placed in the Ranch supervision tree. This means you can call http/3 as many time as you want (providing a different port, of course). You could, for example, just as easily start an additional HTTPS server or run multiple unrelated servers from the same BEAM instance.
 
+### Calls vs Casts
+
+Using calls can be a reasonable first attempt because it promotes consistency. Later, you can easily switch to casts or introduce an intermediate process, depending on the specific situation.
+
+Intermediate process: The idea is to provide an immediate response stating that the request has been queued. Then you do your best to process the request, and you send a subsequent notification about the request’s status.
+
+This scheme is definitely more elaborate and involved, so it’s not appropriate for simpler cases where using plain calls is enough. But in cases when the load is very high and end-to-end operations can take longer, introducing an intermediate process may be beneficial. This process can increase the responsiveness of the system while retain- ing consistency. Moreover, this process can serve as a proactive agent in dealing with congestion and increased load. If the system becomes overloaded and the queue starts piling up, you can refuse to take more requests in the queue process until you regain some breathing space.
+
 
 ## Upto
 
