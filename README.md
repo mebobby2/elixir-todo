@@ -316,7 +316,11 @@ The timeout provided to multicall is important. Without it, multicall, and in tu
 
 When doing distributed calls, you should usually specify a timeout. Note that this is no different from cross-process calls—when making a call to another process, you usually want to have a timeout as well, and GenServer recognizes this by providing a default 5-second timeout. Again, cross-node operations aren’t all that different from cross-process operations, and in many cases you have to consider a similar set of problems when developing a single-node system.
 
+### Use calls for node-node communication
+
+When communicating between nodes, use calls rather than casts.
+
 ## Upto
 
-Upto page 310 - 12.2.4 Testing the system
+Upto page 321 - Chapter 13
 
