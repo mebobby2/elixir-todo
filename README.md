@@ -7,6 +7,10 @@
 * Todo.Server.add_entry(bobs_list, %{date: {2013, 12, 19}, title: "Dentist"})
 * Todo.Server.entries(bobs_list, {2013, 12, 19})
 
+* POST http://localhost:5454/add_entry?list=bob&date=20170120&title=Fundraiser
+* GET http://localhost:5454/entries?list=bob&date=20170120
+
+
 ## Elixir Tips
 
 ### What are the reasons for running a piece of code in a dedicated server process?
