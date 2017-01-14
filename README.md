@@ -297,6 +297,10 @@ The main downside of this approach is that it doesn’t work properly when the c
 
 It’s obvious that the implementation can quickly become more involved, which is why we started simple and chose the global registration approach. Although it’s not particularly scalable, it’s a simple solution that works. But if you need better perfor- mance and scale, you’ll have to resort to a more complex approach.
 
+### Rule of thumb for storing across network partitions
+
+In reality, if you’re asking another process to store data, you should request a confirmation message so you know whether the data has been stored or something went wrong. This becomes increasingly important as you move to a less reliable communication medium (network) where all sorts of things can go wrong. When you expect a request to be used across nodes, you should usually implement it as a call.
+
 ## Upto
 
 Upto page 303 - 12.2.2 The distributed to-do cache
