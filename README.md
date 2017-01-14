@@ -301,6 +301,12 @@ It’s obvious that the implementation can quickly become more involved, which i
 
 In reality, if you’re asking another process to store data, you should request a confirmation message so you know whether the data has been stored or something went wrong. This becomes increasingly important as you move to a less reliable communication medium (network) where all sorts of things can go wrong. When you expect a request to be used across nodes, you should usually implement it as a call.
 
+### Always provide timeouts
+
+The timeout provided to multicall is important. Without it, multicall, and in turn your store operation, would be blocked forever.
+
+When doing distributed calls, you should usually specify a timeout. Note that this is no different from cross-process calls—when making a call to another process, you usually want to have a timeout as well, and GenServer recognizes this by providing a default 5-second timeout. Again, cross-node operations aren’t all that different from cross-process operations, and in many cases you have to consider a similar set of problems when developing a single-node system.
+
 ## Upto
 
 Upto page 303 - 12.2.2 The distributed to-do cache
