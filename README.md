@@ -255,6 +255,12 @@ Locks can help here, because they let you synchronize multiple processes on dif-
 
 Let’s say you need to ensure that the processing of a large amount of data is serialized in the entire cluster (at any point in time, at most one process may run in the entire cluster). Normally, this is done by passing the data to a process that acts as a synchronization point. But passing a large chunk of data may introduce a per- formance penalty because data must be copied and transmitted over the network. To avoid this, you can synchronize different processes with locks and then process the data in the caller context
 
+### Different ways for process registration
+
+You may be puzzled by all these different registration facilities, so let’s recall the key differences. The basic registration facility is a local registration that allows you to use a simple atom as an alias to the single process on a node. gproc extends this by letting you use rich aliases—any term can be used as an alias. gproc is more suit- able for single-node registrations, although it does provide support for global regis- trations as well.
+
+Reaching for :global allows you to register a cluster-wide alias. Finally, :pg2 is use- ful to register multiple processes behind a cluster-wide alias (process group), which is usually suitable for pub-sub scenarios.
+
 
 ## Upto
 
