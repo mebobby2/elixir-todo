@@ -219,8 +219,44 @@ This scheme is definitely more elaborate and involved, so it’s not appropriate
 An OTP application is a reusable component. The application can run the entire supervision tree or just provide utility modules (as a library application). A non-library application is a callback module that must start the supervision
 tree.
 
+### Fully connected cluster
+
+BEAM by default tries to establish a fully connected cluster. If you start a node node3 and connect it to node2, a connection is established to all other nodes that node2 is connected to.
+
+### Group leader process
+
+All standard I/O calls (such as IO.puts/1) are forwarded to the group leader—a process that’s in charge of performing the actual input or output. A spawned process inherits the group leader from the process that spawned it. This is true even when you’re spawning a process on another node. Therefore, your process may run on node2, but its group leader is still on node1. As a consequence, the string to be printed is created on node2 (as the string contents prove), but the output is printed on node1.
+
+### Recognizing remote processes
+
+It should be obvious by now that a pid identifies both a local and a remote process. In almost all cases, you don’t need to worry about the physical location of a process. But it’s worth mentioning some network-specific details about pids.
+
+All the pids you’ve seen up to now have had a similar form: <0.X.0>, where X is a positive integer. Internally, each process has a node-wide unique identifier. This iden- tifier can be seen in the last two numbers of the string representation. If you create enough processes on a single node, the third number will also be greater than zero.
+
+The first number represents the node number—an internal identifier of the node where the process is running. When this number is zero, the process is from the local node. Conversely, when output includes a pid in the form <X.Y.Z> and X isn’t zero, you can be sure it’s a remote process.
+
+### Global Process registration
+
+When a registration is being performed, all nodes are contacted, and they cache the registration information in their local ETS tables. Each subsequent lookup on any node is performed on that node, without any additional chatter. This means a lookup can be performed quickly, whereas registration requires chatting between nodes.
+
+### Groups of processes
+
+Another frequent discovery pattern occurs when you want to register multiple pro- cesses under the same alias. This may sound strange, but it’s useful in situations where you want to categorize processes in the cluster and broadcast messages to all the pro- cesses in a category.
+
+For example, in redundant clusters, you want to keep multiple copies of the same data. Having multiple copies allows you to survive node crashes. If one node termi- nates, a copy should exist somewhere else in the cluster.
+
+### When to use locks
+
+Locking is something you should usually avoid, because it causes the same kinds of problems as classical synchronization approaches. Excessively relying on locks increases the possibility of deadlocks, livelocks, or starvation. Most often, you should synchronize through processes, because it’s easier to reason about the system this way.
+
+But, used judiciously, locks can sometimes improve performance. Remember that message passing has an associated cost; this is especially true in distributed systems, where a message must be serialized and transmitted over the network. If a message is very large, this can introduce significant delays and hurt system performance.
+
+Locks can help here, because they let you synchronize multiple processes on dif- ferent nodes without needing to send large messages to another process.
+
+Let’s say you need to ensure that the processing of a large amount of data is serialized in the entire cluster (at any point in time, at most one process may run in the entire cluster). Normally, this is done by passing the data to a process that acts as a synchronization point. But passing a large chunk of data may introduce a per- formance penalty because data must be copied and transmitted over the network. To avoid this, you can synchronize different processes with locks and then process the data in the caller context
+
 
 ## Upto
 
-Upto page 290 - Chapter 12
+Upto page 303 - 12.2.2 The distributed to-do cache
 
