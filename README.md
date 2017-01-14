@@ -261,6 +261,41 @@ You may be puzzled by all these different registration facilities, so let’s re
 
 Reaching for :global allows you to register a cluster-wide alias. Finally, :pg2 is use- ful to register multiple processes behind a cluster-wide alias (process group), which is usually suitable for pub-sub scenarios.
 
+### Automatic synchronization of registration
+
+I mentioned earlier that global registration sets a cluster-wide lock, and the reg- istration is done in the synchronized piece of code. At any point, there can be at most one process in the entire cluster performing the registration. Therefore, you don’t need to synchronize the registration code yourself. You can safely call multiple simultaneous global registrations of the same alias, and the first one will win; other processes competing for the same alias won’t succeed.
+
+### Alternative to global registration
+
+Keep in mind that global registration is chatty and serialized (only one process at a time may perform global registration). This means the approach you used isn’t very scalable with respect to the number of different to-do lists or the number of nodes in the cluster. The solution will also perform poorly if the network is slow.
+
+Of course, there are alternatives. The main challenge here is to reliably discover the process responsible for a to-do list while reducing network communication. This can be done by introducing a rule that always maps the same to-do list name to the same node in the network. Here’s a simple sketch of the idea:
+
+```
+def node_for_list(todo_list_name) do
+  all_sorted_nodes = Enum.sort(Node.list([:this, :visible]))
+  node_index = :erlang.phash2(
+    todo_list_name,
+    length(all_sorted_nodes)
+  )
+  Enum.at(all_sorted_nodes, node_index)
+end
+```
+
+You get the list of all nodes and sort it to ensure that it’s always in the same order. Then you hash the input name, making sure the result falls in the range 0..length(all_sorted_nodes). Finally, you return the node at the given position. This ensures that as long as the cluster is stable (the list of nodes doesn’t change), the same to-do list will always be mapped to the same node.
+
+Now you can make a discovery in a single hop to the single node by forwarding to the target node and retrieve the desired process there. Like so:
+
+```
+node_for_list(todo_list_name)
+|> :rpc.call(Todo.Cache, :server_process, [todo_list_name])
+```
+
+The benefit is that you can discover the pid with less chatting.
+
+The main downside of this approach is that it doesn’t work properly when the cluster configuration changes. If you add another node or a node disconnects, the mapping rules will change. Dealing with this situation is complex. You need to detect the change in the cluster and migrate all data to different nodes according to new mapping rules. While this data is being migrated, you’ll probably want to keep the service running, which will introduce another layer of complexity. The amount of data that needs to be migrated can be greatly reduced if you use some form of consistent hashing (http://en.wikipedia.org/ wiki/Consistent_hashing)—a smarter mapping of keys to nodes, which is more resil- ient to changes in the cluster.
+
+It’s obvious that the implementation can quickly become more involved, which is why we started simple and chose the global registration approach. Although it’s not particularly scalable, it’s a simple solution that works. But if you need better perfor- mance and scale, you’ll have to resort to a more complex approach.
 
 ## Upto
 
