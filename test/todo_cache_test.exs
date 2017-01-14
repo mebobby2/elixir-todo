@@ -13,7 +13,6 @@ defmodule TodoCacheTest do
 
   test "server_process" do
     Todo.ServerSupervisor.start_link
-    Todo.Cache.start_link
     bobs_list = Todo.Cache.server_process("bobs_list")
     alices_list = Todo.Cache.server_process("alices_list")
 

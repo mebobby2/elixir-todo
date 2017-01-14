@@ -15,9 +15,9 @@ defmodule DatabaseServerTest do
   end
 
   test "pooling" do
-    assert(Todo.Database.store(1, :a) == Todo.Database.store(1, :a))
-    assert(Todo.Database.get(1) == Todo.Database.store(1, :a))
-    assert(Todo.Database.store(2, :a) != Todo.Database.store(1, :a))
+    assert(Todo.Database.store_local(1, :a) == Todo.Database.store_local(1, :a))
+    assert(Todo.Database.get(1) == Todo.Database.store_local(1, :a))
+    assert(Todo.Database.store_local(2, :a) != Todo.Database.store_local(1, :a))
   end
 end
 
