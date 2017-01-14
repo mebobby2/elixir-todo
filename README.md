@@ -2,11 +2,20 @@
 
 ## To Run
 
+### Start server
 * iex -S mix
+
+### Starting a cluster
+* terminal 1: iex --sname node1@localhost -S mix
+* terminal 2: iex --erl "-todo port 5555" --sname node2@localhost -S mix
+* terminal 2: Node.connect(:node1@localhost)
+
+### Use classes directly
 * bobs_list = Todo.Cache.server_process(cache, "Bob's list")
 * Todo.Server.add_entry(bobs_list, %{date: {2013, 12, 19}, title: "Dentist"})
 * Todo.Server.entries(bobs_list, {2013, 12, 19})
 
+### Use HTTP interface
 * POST http://localhost:5454/add_entry?list=bob&date=20170120&title=Fundraiser
 * GET http://localhost:5454/entries?list=bob&date=20170120
 
