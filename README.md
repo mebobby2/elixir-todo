@@ -453,7 +453,6 @@ To start the system as a background process, you can use the start argument:
 
 rel/todo/bin/todo start
 
-## Upto
+### Removing Erlang runtime from release
 
-Upto page 321 - Chapter 13
-
+But embedding the Erlang runtime also ties the release to the particular OS ver- sion and architecture. If this doesn’t suit your needs, you can remove the runtime from the release. Currently, the simplest way to do this is to create a file called todo/ rel/relx.config and place the {include_erts, false}. option in it (note the ending dot character). Then you can regenerate the release, which now won’t contain the Erlang runtime. Nothing else needs to be changed, and you can use the release exactly as before. The release will rely on the existence of the appropriate Erlang run- time, which must be available in the path.
