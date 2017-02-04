@@ -424,7 +424,16 @@ Conceptually, releases seem simple. You need to compile your main OTP applica- t
 
 ### Building a release with exrm
 
-As it is, exrm is currently the best option for deployments.
+As it is, exrm is currently the best option for deployments. However, it now seems exrm is replaced by Distillery.
+
+exrm gives us the mix release command.
+
+Also note that exrm performs protocol consolidation automati- cally, so you don’t need to worry about this step.
+
+MIX_ENV=prod mix compile --no-debug-info
+MIX_ENV=prod mix release
+
+After mix release is done, your release resides in the rel/todo subfolder.
 
 
 ## Upto

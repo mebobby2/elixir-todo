@@ -4,3 +4,4 @@ deps
 Mnesia*
 persist
 erl_crash.dump
+rel
