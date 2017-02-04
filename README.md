@@ -435,6 +435,23 @@ MIX_ENV=prod mix release
 
 After mix release is done, your release resides in the rel/todo subfolder.
 
+### Using a release
+
+The main tool used to interact with a release is the shell script that resides in rel/ todo/bin/todo. You can use it to perform all kinds of tasks, such as these:
+* Starting the system and iex shell in the foreground
+* Starting the system as a background process
+* Stopping the running system
+* Attaching a remote shell to the running system
+
+The simplest way to verify that the release works is to start the system in the fore- ground together with the iex shell:
+
+rel/todo/bin/todo console
+
+I want to stress that the release is no longer dependent on your system’s Erlang and Elixir. It’s fully standalone: you can copy the contents of the rel subfolder to another machine where Elixir and Erlang aren’t installed, and it will still work. Of course, because the release contains Erlang runtime binaries, the target machine has to be powered by the same OS and architecture.
+
+To start the system as a background process, you can use the start argument:
+
+rel/todo/bin/todo start
 
 ## Upto
 
