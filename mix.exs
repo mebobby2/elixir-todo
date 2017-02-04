@@ -38,7 +38,8 @@ defmodule Todo.Mixfile do
       {:plug, "~> 1.2.2"},
       {:meck, "~> 0.8.2", only: :test},
       {:httpotion, "~> 0.2.2", only: :test},
-      {:ibrowse, "~> 4.2.2", only: :test}
+      {:ibrowse, "~> 4.2.2", only: :test},
+      {:exrm, "0.14.11"}
     ]
   end
 end
