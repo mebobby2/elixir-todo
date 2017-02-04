@@ -17,7 +17,7 @@ defmodule Todo.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     [
-      applications: [:logger, :gproc, :cowboy, :plug, :runtime_tools],
+      applications: [:logger, :gproc, :cowboy, :plug, :mnesia, :runtime_tools],
       mod: {Todo.Application, []}
     ]
   end
