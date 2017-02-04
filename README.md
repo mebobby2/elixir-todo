@@ -19,6 +19,12 @@
 * POST http://localhost:5454/add_entry?list=bob&date=20170120&title=Fundraiser
 * GET http://localhost:5454/entries?list=bob&date=20170120
 
+### To make a release
+* mix deps.get (if added new libs)
+* MIX_ENV=prod mix compile --no-debug-info
+* MIX_ENV=prod mix release
+* rel/todo/bin/todo start (starts the system)
+
 
 ## Elixir Tips
 
