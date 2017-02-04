@@ -320,6 +320,113 @@ When doing distributed calls, you should usually specify a timeout. Note that th
 
 When communicating between nodes, use calls rather than casts.
 
+### Deployment
+
+You spent a lot of time building your to-do system, and it’s time to prepare it for production. There are various ways to start your system, but the basic idea is always the same. You have to compile your code as well as your dependencies. Then you start the BEAM instance and ensure that all compiled artifacts are in the load path. Finally, from within the BEAM instance, you need to start your OTP application together with its dependencies. Once the OTP application is started, you can consider your system to be running.
+
+### Bypassing the shell when starting BEAM
+
+When you invoke iex -S mix, all the steps just mentioned are taken to start the system. When running in production, you may want to avoid implicitly starting the iex shell. elixir -S mix run --no-halt will do that for you.
+
+Starting the system with elixir -S mix gets rid of the shell, but the output is still printed. You can get rid of the output by starting the system in detached mode. The OS process will be detached from the terminal, and there will be no console output (it’s redirected to /dev/null).
+
+Starting a detached BEAM instance is as simple as providing a --detached flag to the elixir tool. It’s also useful to turn the BEAM instance into a node, so you can later interact with it and terminate it when needed:
+elixir --detached --sname foo@localhost -S mix run --no-halt
+
+### Connecting to another BEAM shell
+
+A useful thing is that you can connect to a running BEAM instance and interact with it. It’s possible to establish a remote shell— something like a terminal shell session to the running BEAM instance. In particular, you can start another node and use it as a shell to the foo node. This can be done using the --remsh option:
+
+iex --sname bar@localhost --remsh foo@localhost --hidden
+
+Shell is running on the foo node.
+
+To stop the running system (foo), you can use the :init.stop/0 function, which takes down the system in a graceful manner. It shuts down all running applications and then terminates the BEAM instance: init.stop.
+
+The remote shell session is left hanging, and an attempt to run any other command will result in an error. At this point, you can close the shell.
+
+### Elixir script to stop running nodes
+
+```
+if Node.connect(:foo@localhost) == true do
+  :rpc.call(:foo@localhost, :init, :stop, [])
+  IO.puts "Node terminated."
+else
+  IO.puts "Can't connect to a remote node."
+end
+```
+
+You can store the code in the file stop_node.exs (the .exs extension is frequently used for Elixir-based scripts). Then you can run the script from the command line: elixir --sname terminator@localhost stop_node.exs
+
+Running a script starts a separate BEAM instance and interprets the code in that instance. After the script code is executed, the host instance is terminated. Because the script instance needs to connect to a remote node (the one you want to termi- nate), you need to give it a name to turn the BEAM instance into a proper node.
+
+
+### Mix.env has meaning only during compilation
+
+You can use the mix environment to conditionally include code for development- or test-time convenience. For example, you can rely on the existence of the Mix.env variable to define different versions of a function. Here’s a simple sketch:
+
+```
+defmodule Todo.Database do
+  case Mix.env do
+    :dev ->
+      def store(key, data) do ... end
+    :test ->
+      def store(key, data) do ... end
+    _ ->
+      def store(key, data) do ... end
+  end
+end
+
+```
+Notice how you branch on Mix.env on the module level, outside of any functions. This is a compile-time construct, and this code runs during compilation. It’s important to understand that Mix.env has meaning only during compilation. You should never rely on it at runtime.
+
+###  Always compile code with prod environment for production
+
+You should assume that your project isn’t completely optimized when compiled in the :dev environment. When running in production, you usually want to use another mix environment, and the prevalent convention is :prod.
+
+MIX_ENV=prod elixir -S mix run --no-halt
+
+This causes recompilation of the code and all dependencies. All .beam files are stored in the _build/prod folder, and mix ensures that the BEAM instance loads files from this folder.
+
+### Protocol Consolidation
+
+Protocols, described in chapter 4, are also important. To refresh your memory, proto- cols are Elixir’s way of implementing polymorphism. For example, you can iterate over all sorts of data structures, such as lists, maps, and streams, using the single Enum.each/2 function. This function can iterate any structure that implements the Enumerable protocol. Internally, Enum.each/2 makes a polymorphic dispatch to the Enumerable protocol, and this dispatch is resolved at runtime. I won’t get into the details, but you should be aware that dispatch resolving is by default not as efficient as it could be, mostly in order to support development-time convenience.
+
+To make the protocol dispatch as efficient as possible, you need to consolidate pro- tocols. Consolidation analyzes the current state of the project and generates the most efficient dispatching code for each protocol used in the project (and its dependen- cies). Performing a consolidation is as simple as running mix compile.protocols. This is usually needed only when preparing to run in production, so you can also use the :prod mix environment:
+
+MIX_ENV=prod mix compile.protocols (Consolidated protocols written to _build/prod/consolidated)
+
+As the result of the consolidation, you have optimized .beam files in the _build/prod/ consolidated folder. You now need to instruct Elixir to use this folder when looking for binaries:
+
+MIX_ENV=prod elixir -pa _build/prod/consolidated -S mix run --no-halt
+
+And that’s all it takes to optimize protocol dispatch.
+
+### Tip: Always compile in prod env and consolidate protocols
+
+It should be obvious from the discussion that the default compile code (in :dev mode) isn’t as optimal as it could be. This allows for better develop- ment convenience, but it makes the code perform less efficiently. When you decide to measure how your system behaves under a heavier load, you should always consolidate protocols and compile everything in the :prod environ- ment. Measuring a default :dev and nonconsolidated code may give you false indications about bottlenecks, and you may spend energy and time optimiz- ing code that isn’t problematic when it’s consolidated and compiled in the :prod environment.
+
+### Downside of using mix and elixir to deploy and run prod system
+
+At this point, you’re done with the basics of starting the system with mix and elixir. This process was mostly simple, and it fits nicely into your development flow.
+
+There are some serious downsides, though. First, to start the project with mix, you need to compile it, which means the system source code must reside on the host machine. You need to fetch all dependencies and compile them as well. Consequently, you’ll need to install all tools required for compilation on the target host machine. This includes Erlang and Elixir, hex and possibly rebar, and any other third-party tools that you integrate in your mix workflow.
+
+This means you’ll need to pollute the target host machine with compile-time tools. Moreover, if you’re running multiple systems on the same machine, it can become increasingly difficult to reconcile different versions of support tools that are needed for different systems. Luckily, there is a way out, in the form of OTP releases.
+
+### OTP Releases over using mix/elixir
+
+An OTP release is a standalone, compiled, runnable system that consists of the mini- mum set of OTP applications needed by the system. An OTP release can optionally include the minimum set of Erlang runtime binaries, which makes the release com- pletely self-sufficient. A release doesn’t contain artifacts, such as source code, docu- mentation files, or tests.
+
+This approach provides all sort of benefits. First, you can build the system on your development machine or the build server and ship only binary artifacts. Furthermore, the host machine doesn’t need to have any tools installed. If you embed the minimum Erlang runtime into the release, you don’t even need Elixir and Erlang installed on the production server. Whatever is required to run the system will be the part of your release package. Finally, releases pave the way for systematic online system upgrades (and downgrades), known in Erlang as release handling.
+
+Conceptually, releases seem simple. You need to compile your main OTP applica- tion and all of its dependencies and then include all the binaries in the release, together with the Erlang runtime.
+
+### Building a release with exrm
+
+As it is, exrm is currently the best option for deployments.
+
+
 ## Upto
 
 Upto page 321 - Chapter 13
