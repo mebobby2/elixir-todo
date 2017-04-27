@@ -462,3 +462,8 @@ rel/todo/bin/todo start
 ### Removing Erlang runtime from release
 
 But embedding the Erlang runtime also ties the release to the particular OS version and architecture. If this doesn’t suit your needs, you can remove the runtime from the release. Currently, the simplest way to do this is to create a file called todo/ rel/relx.config and place the {include_erts, false}. option in it (note the ending dot character). Then you can regenerate the release, which now won’t contain the Erlang runtime. Nothing else needs to be changed, and you can use the release exactly as before. The release will rely on the existence of the appropriate Erlang run- time, which must be available in the path.
+
+### Links and Monitors
+A basic primitive for detecting a process crash is the concept of links. If two processes are linked, and one of them terminates, the other process receives an exit signal — a notification that a process has crashed.
+
+Links are always bidirectional. Most of the time, this is exactly what you need, but in some cases unidirectional propagation of a process crash works better. Sometimes you need to connect two processes A and B in such a way that process A is notified when B terminates, but not the other way around. In such cases, you can use a monitor, which is something like a unidirectional link.
